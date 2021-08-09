@@ -1,0 +1,37 @@
+name: offline-writes
+
+services:
+  - name: couchbase
+    image: jeremiahchienda/couchbase-starter:latest
+    bindings:
+      - port: 11210
+        name: data
+        connectionString: http://${host}:${port}
+      - port: 8091
+        name: ui
+      - port: 8092
+        name: indexing
+      - port: 8093
+        name: query
+      - port: 8094
+        name: search
+  - name: rabbit
+    image: jeremiahchienda/oaf-rabbit-starter
+    bindings:
+      - port: 5672
+        name: application
+        connectionString: amqp://guest:guest@${host}:${port}/
+      - port: 15672
+        name: admin
+  - name: redis
+    image: bitnami/redis:latest
+    bindings:
+      - port: 6379
+        name: application
+        connectionString: ${host}:${port}
+    env:
+      - ALLOW_EMPTY_PASSWORD=yes
+  - name: api
+    project: src/Api/Api.csproj
+    bindings:
+      - port: 5000
