@@ -1,6 +1,8 @@
 using System;
 using System.Threading.Tasks;
 using Application.Common.DTOs;
+using Application.Teams.Commands;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers.Teams
@@ -9,11 +11,19 @@ namespace Api.Controllers.Teams
     [ApiController]
     public class TeamsController : ControllerBase
     {
+        private readonly  IMediator _mediator;
+
+        public TeamsController(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
+        
         // POST: api/teams
         [HttpPost]
-        public ActionResult<CreateTeamResponseDto> PostTeam(TeamDto teamDto)
+        public async Task<ActionResult<CreateTeamResponseDto>> PostTeam(TeamDto teamDto)
         {
-            // await Task.Delay(100);
+            var command = new CreateTeamCommand(teamDto);
+            var result = await _mediator.Send(command);
             return CreatedAtAction(nameof(PostTeam), new {Message = "Successfully Created Team"},
                 teamDto);
         }
