@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Api.Filters;
 using Application;
+using Dapper;
 using FluentValidation.AspNetCore;
 using Infrastructure;
 using Microsoft.AspNetCore.Builder;
@@ -43,9 +44,9 @@ namespace Api
             services.AddControllers(options =>
                     options.Filters.Add<ApiExceptionFilterAttribute>()
                 )
-                .AddJsonOptions(options => 
-                        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter())
-                    )
+                .AddJsonOptions(options =>
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter())
+                )
                 .AddFluentValidation();
 
             services
@@ -81,6 +82,11 @@ namespace Api
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+            }
+
+            if (!env.IsProduction())
+            {
+                SimpleCRUD.SetDialect(SimpleCRUD.Dialect.SQLite);
             }
 
             app.UseSwagger(c =>

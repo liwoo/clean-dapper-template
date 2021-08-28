@@ -1,8 +1,7 @@
-using System;
 using FluentAssertions;
 using Xunit;
 
-namespace Unit
+namespace UnitTests
 {
     public class SampleTest
     {

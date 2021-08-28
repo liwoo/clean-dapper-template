@@ -24,8 +24,8 @@ namespace Api.Controllers.Teams
         {
             var command = new CreateTeamCommand(teamDto);
             var result = await _mediator.Send(command);
-            return CreatedAtAction(nameof(PostTeam), new {Message = "Successfully Created Team"},
-                teamDto);
+            return CreatedAtAction(nameof(PostTeam), new {Id = result.Id},
+                result);
         }
     }
 }

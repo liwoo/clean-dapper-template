@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -18,11 +19,13 @@ namespace IntegrationTests
     {
         public static IServiceScopeFactory ServiceScopeFactory { get; private set; }
         public static IConfigurationRoot Configuration { get; private set; }
+
         public static HttpClient Client { get; private set; }
 
         [OneTimeSetUp]
         public void RunBeforeAnyTests()
         {
+            Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Testing");
             const string testSettings = "appsettings.Testing.json";
             var directoryInfo = Directory.GetParent(Directory.GetCurrentDirectory())?.Parent?.Parent?.Parent;
             if (directoryInfo == null) return;
@@ -45,7 +48,8 @@ namespace IntegrationTests
 
             ServiceScopeFactory = services.BuildServiceProvider().GetService<IServiceScopeFactory>();
             Client = new TestServer(new WebHostBuilder()
-                .ConfigureAppConfiguration((context, configurationBuilder) => {
+                .ConfigureAppConfiguration((context, configurationBuilder) =>
+                {
                     configurationBuilder.SetBasePath(rootDir);
                     configurationBuilder.AddJsonFile(testSettings);
                 }).UseStartup<Startup>()).CreateClient();

@@ -13,7 +13,6 @@ namespace Application.Common.DTOs
         [Required]
         public int Position { get; init; }
         [Required]
-        [JsonConverter(typeof(StringEnumConverter))]
         public KnownColor HomeKitColor { get; init; }
         [Required]
         public string Stadium { get; init; }
