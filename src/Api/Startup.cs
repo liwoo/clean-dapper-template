@@ -138,6 +138,8 @@ namespace Api
                 });
             });
 
+            if (env.IsEnvironment("Testing")) return;
+            
             using var scope = app.ApplicationServices.CreateScope();
             var migrator = scope.ServiceProvider.GetService<IMigrationRunner>();
             migrator?.MigrateUp();

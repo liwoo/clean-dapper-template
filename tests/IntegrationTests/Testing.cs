@@ -3,13 +3,16 @@ using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Api;
+using FluentMigrator.Runner;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using NUnit.Framework;
+using Respawn;
 
 namespace IntegrationTests
 {
@@ -53,6 +56,23 @@ namespace IntegrationTests
                     configurationBuilder.SetBasePath(rootDir);
                     configurationBuilder.AddJsonFile(testSettings);
                 }).UseStartup<Startup>()).CreateClient();
+        }
+
+        public static void ResetAndMigrateDatabase()
+        {
+            var dbPath = Configuration.GetConnectionString("Database")[12..];
+            try
+            {
+                File.Delete(dbPath);
+                using var scope = ServiceScopeFactory.CreateScope();
+                var migrator = scope.ServiceProvider.GetService<IMigrationRunner>();
+                migrator?.MigrateUp();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
     }
 }

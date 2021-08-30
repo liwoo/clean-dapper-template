@@ -31,12 +31,13 @@ namespace IntegrationTests.ApiTests
                 HomeKitColor = KnownColor.Firebrick
             });
         }
-
+        
         [SetUp]
         public void Setup()
         {
             using var scope = ServiceScopeFactory.CreateScope();
             _teamRepository = scope.ServiceProvider.GetService<ITeamRepository>();
+            ResetAndMigrateDatabase();
         }
 
         [Test]
