@@ -1,4 +1,6 @@
+using System.Reflection;
 using Application.Common.Interfaces;
+using FluentMigrator.Runner;
 using Infrastructure.Email;
 using Infrastructure.HttpClient;
 using Infrastructure.Persistence;
@@ -15,6 +17,14 @@ namespace Infrastructure
             services.AddSingleton<ISendEmails, FakeEmailClient>();
             services.AddSingleton<IHttpClient, FakeHttpClient>();
             services.AddSingleton<ITeamRepository, DapperTeamRepository>();
+
+            services.AddFluentMigratorCore()
+                .ConfigureRunner(config =>
+                    config.AddSQLite()
+                        .WithGlobalConnectionString(configuration.GetConnectionString("Database"))
+                        .ScanIn(Assembly.GetExecutingAssembly()).For.All()
+                ).AddLogging(config => config.AddFluentMigratorConsole());
+
             return services;
         }
     }

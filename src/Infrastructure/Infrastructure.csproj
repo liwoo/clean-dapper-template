@@ -7,8 +7,12 @@
 
   <ItemGroup>
     <PackageReference Include="Dapper.SimpleCRUD" Version="2.3.0" />
+    <PackageReference Include="FluentMigrator" Version="3.3.0" />
+    <PackageReference Include="FluentMigrator.Runner" Version="3.3.0" />
+    <PackageReference Include="FluentMigrator.Runner.SQLite" Version="3.3.0" />
     <PackageReference Include="Flurl.Http" Version="3.2.0" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="5.0.8" />
+    <PackageReference Include="Simple.Migrations" Version="0.9.21" />
     <!-- <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
     <PackageReference Include="Couchbase.Extensions.DependencyInjection" Version="3.0.4.811" /> -->

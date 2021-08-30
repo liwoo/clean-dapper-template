@@ -7,6 +7,7 @@ using System.Text.Json.Serialization;
 using Api.Filters;
 using Application;
 using Dapper;
+using FluentMigrator.Runner;
 using FluentValidation.AspNetCore;
 using Infrastructure;
 using Microsoft.AspNetCore.Builder;
@@ -56,24 +57,7 @@ namespace Api
                 .AddHealthChecksUI()
                 .AddInMemoryStorage();
 
-            services.AddSwaggerGen(c =>
-            {
-                c.EnableAnnotations();
-                c.SwaggerDoc(
-                    "v1",
-                    new OpenApiInfo {Title = _name, Version = _version}
-                );
-
-                var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-                var commentsFileName = Assembly
-                    .GetExecutingAssembly()
-                    .GetName().Name + ".xml";
-                var applicationsCommentsFile = Path.Combine(
-                    baseDirectory,
-                    commentsFileName
-                );
-                c.IncludeXmlComments(applicationsCommentsFile);
-            });
+            services.AddSwaggerGen();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -97,13 +81,17 @@ namespace Api
                     {
                         new OpenApiServer
                         {
-                            Url = $"{request.Scheme}://{request.Host.Value}{_basePath}"
+                            Url = $"{request.Scheme}://{request.Host.Value}"
                         }
                     };
                 });
             });
+
             app.UseSwaggerUI(
-                c => c.SwaggerEndpoint("v1/swagger.json", $"{_name} {_version}")
+                c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", $"{_name} {_version}");
+                }
             );
 
             app.UseHttpsRedirection();
@@ -149,6 +137,10 @@ namespace Api
                     await context.Response.WriteAsync(infoJson);
                 });
             });
+
+            using var scope = app.ApplicationServices.CreateScope();
+            var migrator = scope.ServiceProvider.GetService<IMigrationRunner>();
+            migrator?.MigrateUp();
         }
     }
 }

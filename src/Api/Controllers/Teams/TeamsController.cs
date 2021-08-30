@@ -27,5 +27,11 @@ namespace Api.Controllers.Teams
             return CreatedAtAction(nameof(PostTeam), new {Id = result.Id},
                 result);
         }
+
+        [HttpGet]
+        public string GetHello()
+        {
+            return "Hello";
+        }
     }
 }
