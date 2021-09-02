@@ -1,8 +1,10 @@
+using System;
 using System.Data;
 using System.IO;
 using System.Threading.Tasks;
 using Application.Common.Interfaces;
 using Dapper;
+using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 
@@ -14,10 +16,20 @@ namespace Infrastructure.Persistence
 
         protected DapperBase(IConfiguration configuration)
         {
-            using var sqliteConnection =
-                new SqliteConnection(configuration.GetConnectionString("Database"));
-            sqliteConnection.Open();
-            _connection = sqliteConnection;
+            if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Testing")
+            {
+                using var sqliteConnection =
+                    new SqliteConnection(configuration.GetConnectionString("Database"));
+                sqliteConnection.Open();
+                _connection = sqliteConnection;
+            }
+            else
+            {
+                using var conn =
+                    new SqlConnection(configuration.GetConnectionString("Database"));
+                conn.Open();
+                _connection = conn;
+            }
         }
 
         public async Task<TEntity> GetAsync(int id)

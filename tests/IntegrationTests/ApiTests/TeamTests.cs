@@ -65,6 +65,8 @@ namespace IntegrationTests.ApiTests
         [Test]
         public async Task TestThatTeamIsReflectedInDatabase()
         {
+            var initialResult = await _teamRepository.GetAsync(1);
+            initialResult.Should().BeNull();
             await Client.PostAsync("/api/teams",
                 new StringContent(_serializedBody, Encoding.UTF8, "application/json"));
             var result = await _teamRepository.GetAsync(1);
