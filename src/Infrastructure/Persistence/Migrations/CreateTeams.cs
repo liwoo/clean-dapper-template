@@ -1,4 +1,3 @@
-using System;
 using FluentMigrator;
 
 namespace Infrastructure.Persistence.Migrations
@@ -8,13 +7,16 @@ namespace Infrastructure.Persistence.Migrations
     {
         public override void Up()
         {
-            Create.Table("teams")
-                .WithColumn("id").AsInt32().NotNullable().PrimaryKey().Identity()
-                .WithColumn("name").AsString(255).NotNullable()
-                .WithColumn("position").AsInt32().NotNullable()
-                .WithColumn("home_kit_color").AsString(255).NotNullable()
-                .WithColumn("stadium").AsString(255).NotNullable()
-                .WithColumn("city").AsString(255).NotNullable();
+            if (!Schema.Table("teams").Exists())
+            {
+                Create.Table("teams")
+                    .WithColumn("id").AsInt32().NotNullable().PrimaryKey().Identity()
+                    .WithColumn("name").AsString(255).NotNullable()
+                    .WithColumn("position").AsInt32().NotNullable()
+                    .WithColumn("home_kit_color").AsString(255).NotNullable()
+                    .WithColumn("stadium").AsString(255).NotNullable()
+                    .WithColumn("city").AsString(255).NotNullable();
+            }
         }
 
         public override void Down()

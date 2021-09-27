@@ -1,50 +1,82 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
-using System.IO;
 using System.Threading.Tasks;
 using Application.Common.Interfaces;
 using Dapper;
-using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
+using Npgsql;
 
 namespace Infrastructure.Persistence
 {
     public abstract class DapperBase<TEntity> : IDapperRepository<TEntity>
     {
-        private readonly IDbConnection _connection;
+        private readonly string _connectionString;
+
+        protected IDbConnection CreateConnection()
+        {
+            string env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
+            IDbConnection connection = (env == "Testing") ?
+                new SqliteConnection(_connectionString) :
+                new NpgsqlConnection(_connectionString);
+
+            connection.Open();
+            return connection;
+        }
 
         protected DapperBase(IConfiguration configuration)
         {
-            if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Testing")
-            {
-                using var sqliteConnection =
-                    new SqliteConnection(configuration.GetConnectionString("Database"));
-                sqliteConnection.Open();
-                _connection = sqliteConnection;
-            }
-            else
-            {
-                using var conn =
-                    new SqlConnection(configuration.GetConnectionString("Database"));
-                conn.Open();
-                _connection = conn;
-            }
+            _connectionString = configuration.GetConnectionString("Database");
         }
 
-        public async Task<TEntity> GetAsync(int id)
+        public async Task<TEntity> GetAsync(int entityId)
         {
-            return await _connection.GetAsync<TEntity>(id);
+            using IDbConnection connection = CreateConnection();
+            return await connection.GetAsync<TEntity>(entityId);
+        }
+
+        public async Task<IEnumerable<TEntity>> GetAllAsync(
+            int pageNumber,
+            int rowsPerPage,
+            string conditions,
+            string orderby,
+            object parameters = null
+        )
+        {
+            using IDbConnection connection = CreateConnection();
+            return await connection.GetListPagedAsync<TEntity>(
+                pageNumber,
+                rowsPerPage,
+                conditions,
+                orderby,
+                parameters
+            );
         }
 
         public async Task<int?> InsertAsync(TEntity entity)
         {
-            return await _connection.InsertAsync(entity);
+            using IDbConnection connection = CreateConnection();
+            return await connection.InsertAsync(entity);
         }
 
         public async Task<int> RecordCountAsync()
         {
-            return await _connection.RecordCountAsync<TEntity>();
+            using IDbConnection connection = CreateConnection();
+            return await connection.RecordCountAsync<TEntity>();
+        }
+
+        public async Task DeleteByIdAsync(int id)
+        {
+            using IDbConnection connection = CreateConnection();
+            _ = await connection.DeleteAsync<TEntity>(id);
+        }
+
+        public async Task<int?> UpdateAsync(TEntity entity)
+        {
+            using IDbConnection connection = CreateConnection();
+            return await connection.UpdateAsync(entity);
         }
     }
 }
