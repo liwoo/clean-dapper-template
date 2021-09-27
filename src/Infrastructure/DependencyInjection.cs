@@ -1,3 +1,4 @@
+using System;
 using System.Reflection;
 using Application.Common.Interfaces;
 using FluentMigrator.Runner;
@@ -19,10 +20,22 @@ namespace Infrastructure
             services.AddSingleton<ITeamRepository, DapperTeamRepository>();
 
             services.AddFluentMigratorCore()
-                .ConfigureRunner(config =>
-                    config.AddSQLite()
-                        .WithGlobalConnectionString(configuration.GetConnectionString("Database"))
-                        .ScanIn(Assembly.GetExecutingAssembly()).For.All()
+                .ConfigureRunner(config => {
+                    var connectionString = configuration.GetConnectionString("Database");
+                    if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Testing")
+                    {
+                        config.AddSQLite();
+                    }
+                    else
+                    {
+                        config.AddPostgres();
+                    }
+
+                    config
+                        .WithGlobalConnectionString(connectionString)
+                        .ScanIn(Assembly.GetExecutingAssembly())
+                        .For.All();
+                }
                 ).AddLogging(config => config.AddFluentMigratorConsole());
 
             return services;
