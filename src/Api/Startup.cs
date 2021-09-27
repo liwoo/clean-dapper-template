@@ -68,9 +68,13 @@ namespace Api
                 app.UseDeveloperExceptionPage();
             }
 
-            if (!env.IsProduction())
+            if (env.IsEnvironment("Testing"))
             {
                 SimpleCRUD.SetDialect(SimpleCRUD.Dialect.SQLite);
+            }
+            else
+            {
+                SimpleCRUD.SetDialect(SimpleCRUD.Dialect.PostgreSQL);
             }
 
             app.UseSwagger(c =>
@@ -139,7 +143,7 @@ namespace Api
             });
 
             if (env.IsEnvironment("Testing")) return;
-            
+
             using var scope = app.ApplicationServices.CreateScope();
             var migrator = scope.ServiceProvider.GetService<IMigrationRunner>();
             migrator?.MigrateUp();
